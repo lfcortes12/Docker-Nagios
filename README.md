@@ -19,13 +19,13 @@ docker pull luiscortes/docker-nagios:latest
 Run with the example configuration with the following:
 
 ```sh
-docker run --name nagios4 -p 0.0.0.0:8080:80 jasonrivers/nagios:latest
+docker run --name nagios4 -p 0.0.0.0:8080:80 luiscortes/docker-nagios:latest
 ```
 
 alternatively you can use external Nagios configuration & log data with the following:
 
 ```sh
-docker run --name nagios4 -v /path-to-nagios/etc/:/opt/nagios/etc/ -v /path-to-nagios/var:/opt/nagios/var/ -p 0.0.0.0:8080:80 jasonrivers/nagios:latest
+docker run --name nagios4 -v /path-to-nagios/etc/:/opt/nagios/etc/ -v /path-to-nagios/var:/opt/nagios/var/ -p 0.0.0.0:8080:80 luiscortes/docker-nagios:latest
 ```
 
 For best results your Nagios image should have access to both IPv4 & IPv6 networks 
