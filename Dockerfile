@@ -1,5 +1,5 @@
-FROM ubuntu:14.04
-MAINTAINER Jason Rivers <jason@jasonrivers.co.uk>
+FROM ubuntu:16.04
+MAINTAINER Luis Cortes <luis.cortes@defensajuridica.gov.co>
 
 ENV NAGIOS_HOME			/opt/nagios
 ENV NAGIOS_USER			nagios
@@ -16,6 +16,7 @@ ENV NG_NAGIOS_CONFIG_FILE	${NAGIOS_HOME}/etc/nagios.cfg
 ENV NG_CGI_DIR			${NAGIOS_HOME}/sbin
 ENV NG_WWW_DIR			${NAGIOS_HOME}/share/nagiosgraph
 ENV NG_CGI_URL			/cgi-bin
+ENV TERM 			xterm
 
 
 RUN	sed -i 's/universe/universe multiverse/' /etc/apt/sources.list	;\
@@ -31,12 +32,12 @@ RUN	sed -i 's/universe/universe multiverse/' /etc/apt/sources.list	;\
 		snmp							\
 		snmpd							\
 		snmp-mibs-downloader					\
-		php5-cli						\
-		php5-gd							\
+		php-cli						\
+		php-gd							\
 		libgd2-xpm-dev						\
 		apache2							\
 		apache2-utils						\
-		libapache2-mod-php5					\
+		libapache2-mod-php					\
 		runit							\
 		unzip							\
 		bc							\
@@ -52,6 +53,9 @@ RUN	sed -i 's/universe/universe multiverse/' /etc/apt/sources.list	;\
 		fping							\
 		libfreeradius-client-dev				\
 		libnet-snmp-perl					\
+		default-jre					        \
+		nano					        	\
+		sendemail					        \
 		libnet-xmpp-perl				&&	\
 		apt-get clean
 
@@ -122,9 +126,9 @@ RUN	cd /tmp											&&	\
 		--www-user ${NAGIOS_USER}								\
 		--nagios-perfdata-file ${NAGIOS_HOME}/var/perfdata.log					\
 		--nagios-cgi-url /cgi-bin							&&	\
-	cp share/nagiosgraph.ssi ${NAGIOS_HOME}/share/ssi/common-header.ssi			
+	cp share/nagiosgraph.ssi ${NAGIOS_HOME}/share/ssi/common-header.ssi	
 
-RUN cd /opt &&		\
+RUN     cd /opt &&		\
 	git clone https://github.com/willixix/WL-NagiosPlugins.git	WL-Nagios-Plugins	&&	\
 	git clone https://github.com/JasonRivers/nagios-plugins.git	JR-Nagios-Plugins	&&	\
 	git clone https://github.com/justintime/nagios-plugins.git      JE-Nagios-Plugins       &&      \
@@ -132,6 +136,14 @@ RUN cd /opt &&		\
 	chmod +x /opt/JE-Nagios-Plugins/check_mem/check_mem.pl                                  &&      \
 	cp /opt/JE-Nagios-Plugins/check_mem/check_mem.pl /opt/nagios/libexec/                   &&      \
 	cp /opt/nagios/libexec/utils.sh /opt/JR-Nagios-Plugins/
+
+RUN     cd /tmp 										&&	\
+	wget https://snippets.syabru.ch/nagios-jmx-plugin/download/nagios-jmx-plugin.zip	&&	\
+	unzip nagios-jmx-plugin.zip								&&	\
+        cp nagios-jmx-plugin-1.2.3/check_jm* /opt/nagios/libexec/				&&	\
+        cd /opt/nagios/libexec/									&&	\
+        chmod 755 check_jmx									&&	\
+        chmod 755 check_jmx.jar
 
 
 RUN	sed -i.bak 's/.*\=www\-data//g' /etc/apache2/envvars
@@ -155,6 +167,15 @@ RUN	mkdir -p /usr/share/snmp/mibs								&&	\
 	echo "cfg_dir=${NAGIOS_HOME}/etc/conf.d" >> ${NAGIOS_HOME}/etc/nagios.cfg		&&	\
 	echo "cfg_dir=${NAGIOS_HOME}/etc/monitor" >> ${NAGIOS_HOME}/etc/nagios.cfg		&&	\
 	download-mibs && echo "mibs +ALL" > /etc/snmp/snmp.conf
+
+#Configuracion de sendmail 
+RUN	cd /tmp											&&	\
+	wget http://caspian.dotconf.net/menu/Software/SendEmail/sendEmail-v1.56.tar.gz		&&	\
+	tar xvfz sendEmail-v1.56.tar.gz								&&	\
+	cp sendEmail-v1.56/sendEmail /opt/nagios/libexec/					&&	\
+	chmod 755 /opt/nagios/libexec/sendEmail							&&	\
+	echo -n > /var/log/sendEmail								&&	\
+	chmod 755 /var/log/sendEmail						
 
 RUN	sed -i 's,/bin/mail,/usr/bin/mail,' /opt/nagios/etc/objects/commands.cfg		&&	\
 	sed -i 's,/usr/usr,/usr,'           /opt/nagios/etc/objects/commands.cfg
