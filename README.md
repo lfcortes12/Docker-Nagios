@@ -1,7 +1,7 @@
 # Docker-Nagios
 Docker image for Nagios
 
-Nagios Core 4.1.1 running on Ubuntu 14.04 LTS with NagiosGraph & NRPE
+Nagios Core 4.1.1 running on Ubuntu 16.04 LTS with NagiosGraph & NRPE. This image is a fork of jasonrivers/nagios:latest
 
 
 ### Configurations
@@ -11,7 +11,7 @@ NagiosGraph configuration lives in /opt/nagiosgraph/etc
 ### Install
 
 ```sh
-docker pull jasonrivers/nagios:latest
+docker pull luiscortes/docker-nagios:latest
 ```
 
 ### Running
